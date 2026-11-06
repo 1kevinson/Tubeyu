@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import type { HealthService } from '../services/health.service.js'
+import type { HealthService } from './health.service.js'
 
 export class HealthController {
   constructor(private readonly service: HealthService) {}

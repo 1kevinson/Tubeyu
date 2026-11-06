@@ -1,4 +1,4 @@
-import type { HealthRepository } from '../repositories/health.repository.js'
+import type { HealthRepository } from './health.repository.js'
 
 export class DatabaseUnavailableError extends Error {
   constructor(cause: unknown) {

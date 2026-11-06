@@ -1,18 +1,31 @@
 import cors from '@fastify/cors'
 import Fastify from 'fastify'
-import { HealthController } from './controllers/health.controller.js'
-import type { HealthRepository } from './repositories/health.repository.js'
-import { registerHealthRoutes } from './routes/health.routes.js'
-import { DatabaseUnavailableError, HealthService } from './services/health.service.js'
+import { HealthController } from './features/health/health.controller.js'
+import type { HealthRepository } from './features/health/health.repository.js'
+import { registerHealthRoutes } from './features/health/health.routes.js'
+import { DatabaseUnavailableError, HealthService } from './features/health/health.service.js'
+import type { TrackRepository } from './features/tracks/tracks.repository.js'
+import { registerTrackRoutes } from './features/tracks/tracks.routes.js'
+import { TrackService } from './features/tracks/tracks.service.js'
+import type { UrlRepository } from './features/url-management/url-management.repository.js'
+import { registerUrlManagementRoutes } from './features/url-management/url-management.routes.js'
+import { UrlManagementService } from './features/url-management/url-management.service.js'
 
 interface AppOptions {
   healthRepository: HealthRepository
+  trackRepository: TrackRepository
+  urlRepository: UrlRepository
   corsOrigin: string
   logger?: boolean
 }
 
-export function buildApp({ healthRepository, corsOrigin, logger = true }: AppOptions) {
-  const app = Fastify({ logger })
+export function buildApp({
+  healthRepository, trackRepository, urlRepository, corsOrigin, logger = true,
+}: AppOptions) {
+  const app = Fastify({
+    logger,
+    ajv: { customOptions: { removeAdditional: false, coerceTypes: false } },
+  })
 
   app.register(cors, { origin: corsOrigin })
 
@@ -44,6 +57,9 @@ export function buildApp({ healthRepository, corsOrigin, logger = true }: AppOpt
 
   const service = new HealthService(healthRepository)
   registerHealthRoutes(app, new HealthController(service))
+  const tracks = new TrackService(trackRepository)
+  registerTrackRoutes(app, tracks)
+  registerUrlManagementRoutes(app, new UrlManagementService(urlRepository, tracks))
 
   return app
 }

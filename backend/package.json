@@ -2,6 +2,7 @@
   "name": "tubeyu-backend",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@12.18.0",
   "type": "module",
   "engines": {
     "node": ">=26.13.0 <27"
@@ -15,6 +16,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
+    "prisma:seed": "prisma db seed",
+    "prisma:drop": "node --env-file-if-exists=.env --import tsx prisma/drop.ts",
     "prisma:studio": "prisma studio"
   },
   "dependencies": {

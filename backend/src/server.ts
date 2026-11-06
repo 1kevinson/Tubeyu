@@ -1,12 +1,16 @@
 import { buildApp } from './app.js'
 import { loadConfig } from './config.js'
 import { createPrismaClient } from './database/prisma.js'
-import { PrismaHealthRepository } from './repositories/health.repository.js'
+import { PrismaHealthRepository } from './features/health/health.repository.js'
+import { PrismaTrackRepository } from './features/tracks/tracks.repository.js'
+import { PrismaUrlRepository } from './features/url-management/url-management.repository.js'
 
 const config = loadConfig()
 const prisma = createPrismaClient(config.databaseUrl)
 const app = buildApp({
   healthRepository: new PrismaHealthRepository(prisma),
+  trackRepository: new PrismaTrackRepository(prisma),
+  urlRepository: new PrismaUrlRepository(prisma),
   corsOrigin: config.corsOrigin,
 })
 

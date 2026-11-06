@@ -1,15 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { buildApp } from '../src/app.js'
-import type { HealthRepository } from '../src/repositories/health.repository.js'
-
-function createApp(healthRepository: HealthRepository) {
-  return buildApp({
-    healthRepository,
-    corsOrigin: 'http://localhost:5173',
-    logger: false,
-  })
-}
+import { createTestApp as createApp } from './helpers.js'
 
 test('liveness preserves the existing response without accessing the database', async (t) => {
   const app = createApp({

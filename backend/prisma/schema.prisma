@@ -6,3 +6,38 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  email        String   @unique
+  passwordHash String?  @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("users")
+}
+
+model Track {
+  id       String        @id @default(uuid()) @db.Uuid
+  title    String
+  artist   String
+  album    String
+  duration Int
+  sources  TrackSource[]
+
+  @@map("tracks")
+}
+
+model TrackSource {
+  id         String @id @default(uuid()) @db.Uuid
+  trackId    String @map("track_id") @db.Uuid
+  sourceUrl  String @map("source_url")
+  provider   String
+  externalId String @map("external_id")
+  track      Track  @relation(fields: [trackId], references: [id])
+
+  @@unique([provider, externalId])
+  @@index([trackId])
+  @@map("track_sources")
+}

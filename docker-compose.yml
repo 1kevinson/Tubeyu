@@ -7,18 +7,18 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      NODE_ENV: development
-      PORT: 3000
-      DATABASE_URL: postgres://tubeyu:tubeyu@db:5432/tubeyu
+      NODE_ENV: ${NODE_ENV:?Set NODE_ENV in .env}
+      PORT: ${BACKEND_PORT:?Set BACKEND_PORT in .env}
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in .env}
     ports:
-      - "3000:3000"
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
     volumes:
       - ./backend:/app
-      - backend_node_modules:/app/node_modules
+      - backend_pnpm_node_modules:/app/node_modules
     depends_on:
       db:
         condition: service_healthy
-    command: sh -c "npm run prisma:generate && npm run dev"
+    command: sh -c "pnpm run prisma:generate && pnpm run dev"
 
   frontend:
     build:
@@ -26,16 +26,16 @@ services:
       dockerfile: Dockerfile
     container_name: tubeyu-frontend
     environment:
-      NODE_ENV: development
-      VITE_API_URL: http://localhost:3000
+      NODE_ENV: ${NODE_ENV:?Set NODE_ENV in .env}
+      VITE_API_URL: ${VITE_API_URL:?Set VITE_API_URL in .env}
     ports:
-      - "5173:5173"
+      - "${FRONTEND_PORT:?Set FRONTEND_PORT in .env}:5173"
     volumes:
       - ./frontend:/app
-      - frontend_node_modules:/app/node_modules
+      - frontend_pnpm_node_modules:/app/node_modules
     depends_on:
       - backend
-    command: npm run dev -- --host 0.0.0.0
+    command: pnpm run dev --host 0.0.0.0
 
   worker:
     build:
@@ -43,18 +43,18 @@ services:
       dockerfile: Dockerfile
     container_name: tubeyu-worker
     environment:
-      NODE_ENV: development
-      DATABASE_URL: postgres://tubeyu:tubeyu@db:5432/tubeyu
-      REDIS_URL: redis://caching:6379
+      NODE_ENV: ${NODE_ENV:?Set NODE_ENV in .env}
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in .env}
+      REDIS_URL: ${REDIS_URL:?Set REDIS_URL in .env}
     volumes:
       - ./worker:/app
-      - worker_node_modules:/app/node_modules
+      - worker_pnpm_node_modules:/app/node_modules
     depends_on:
       db:
         condition: service_healthy
-      caching:
+      broker:
         condition: service_healthy
-    command: npm run start:dev
+    command: pnpm run start:dev
 
   db:
     build:
@@ -62,26 +62,26 @@ services:
       dockerfile: Dockerfile
     container_name: tubeyu-db
     environment:
-      POSTGRES_USER: tubeyu
-      POSTGRES_PASSWORD: tubeyu
-      POSTGRES_DB: tubeyu
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in .env}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:?Set POSTGRES_PORT in .env}:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U tubeyu -d tubeyu"]
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 5s
       timeout: 5s
       retries: 10
 
-  caching:
+  broker:
     build:
-      context: ./caching
+      context: ./broker
       dockerfile: Dockerfile
-    container_name: tubeyu-caching
+    container_name: tubeyu-broker
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:?Set REDIS_PORT in .env}:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -90,6 +90,6 @@ services:
 
 volumes:
   db_data:
-  backend_node_modules:
-  frontend_node_modules:
-  worker_node_modules:
+  backend_pnpm_node_modules:
+  frontend_pnpm_node_modules:
+  worker_pnpm_node_modules:
