@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="44" viewBox="0 0 180 44" role="img" aria-labelledby="title">
+  <title id="title">Project overview</title>
+  <rect x="0.5" y="0.5" width="179" height="43" rx="12" fill="#eff9f8" stroke="#d7eeee"/>
+  <text x="90" y="22" dominant-baseline="middle" text-anchor="middle" fill="#436d65" font-family="system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="13" font-weight="700">OVERVIEW</text>
+</svg>
